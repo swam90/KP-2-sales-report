@@ -1,127 +1,118 @@
-# KP2 Sales Report — Installable App
+# KP-4 Sales Report — Installable App
 
-Turn your sales report into an installable phone app that staff and partners can
-add to their home screen on **Android** or **iOS**, with offline support.
-
----
-
-## What's in this folder
-
-| File | Purpose |
-|---|---|
-| `index.html` | The app itself |
-| `manifest.webmanifest` | Tells phones it's an installable app |
-| `sw.js` | Service worker — enables offline mode |
-| `icon-192.png` / `icon-512.png` | App icons (standard) |
-| `icon-512-maskable.png` | Android adaptive icon |
-| `apple-touch-icon.png` | iOS home-screen icon |
-| `favicon.png` | Browser tab icon |
-
-You need to **upload all of these together** to a web host.
-The app won't install correctly if files are missing or the host isn't HTTPS.
+Daily sales tracker with 9% GST, MTD, tender breakdown, and offline support.
+After hosting once, anyone with the URL can install it on their phone like
+a native app.
 
 ---
 
-## Step 1 — Host it (pick one, ~3 minutes)
+## ⚠️ READ THIS FIRST
 
-### Option A: Netlify Drop (easiest, no account needed to try)
+Your GitHub repo must contain **exactly these 9 files**, all at the root
+(no subfolders, no `.zip` files):
 
-1. Go to **https://app.netlify.com/drop**
-2. Drag this entire folder onto the page
-3. You instantly get a URL like `https://lucky-name-12345.netlify.app`
-4. (Optional) Sign up free to claim the site permanently and rename it
+```
+✓ index.html
+✓ manifest.webmanifest
+✓ sw.js
+✓ icon-192.png
+✓ icon-512.png
+✓ icon-maskable-512.png
+✓ apple-touch-icon.png
+✓ favicon.ico
+✓ favicon-32.png
+```
 
-### Option B: Cloudflare Pages
-
-1. Go to **https://pages.cloudflare.com** → sign up free
-2. Click "Upload assets" → drag the folder
-3. Get a URL like `https://kp2-report.pages.dev`
-
-### Option C: GitHub Pages (most permanent)
-
-1. Create a free GitHub account
-2. Create a new repository (e.g. `kp2-report`), make it **public**
-3. Upload all files in this folder to the repo root
-4. Settings → Pages → Source: "Deploy from branch" → `main` / `/ (root)` → Save
-5. After ~1 minute, your site is at `https://YOURNAME.github.io/kp2-report/`
-
-> **Important:** the host **must use HTTPS**. All three options above do this
-> automatically. PWAs will not install over plain `http://`.
+If any of these is missing, or if extra files like `kp2-app.zip`,
+`icon-512-maskable.png`, or `favicon.png` are present, **the install will
+fail** and you'll see a gray fallback icon on your phone.
 
 ---
 
-## Step 2 — Share the URL with your team
+## 🧹 If your repo already has wrong files
 
-Once hosted, just send the URL via WhatsApp, email, or paste it into a group chat.
-Below is the message users will need to install it.
+Delete everything in the repo first, then upload only the 9 files above.
 
-### For Android users
+**From GitHub on phone:**
+1. Open each wrong file → tap **⋯** menu → **Delete file** → **Commit changes**.
+2. Repeat for every file that doesn't belong.
+3. Then upload the correct files (next section).
 
-> Open this link in **Chrome**: `https://your-url-here`
-> Chrome will show an "Install app" banner — tap it.
-> If you don't see the banner, tap the **⋮ menu → Install app** (or "Add to Home screen").
-
-### For iPhone / iPad users
-
-> Open this link in **Safari** (not Chrome — iOS requires Safari for this):
-> `https://your-url-here`
-> Tap the **Share button** (square with up arrow) → scroll down →
-> **Add to Home Screen** → Add.
-
-After installing, the app icon appears on the home screen and opens fullscreen
-without browser bars — just like a real app from the Play Store / App Store.
+**Easier: delete the repo and start fresh.**
+1. Repo → **Settings** → scroll to bottom → **Delete this repository**.
+2. Create a new empty repo.
+3. Upload the 9 files below.
 
 ---
 
-## Step 3 — Updating the app later
+## 📤 How to upload (GitHub, from phone or desktop)
 
-When you change `index.html`:
-
-1. Open `sw.js` and bump the version line:
-   ```js
-   const CACHE_VERSION = 'kp2-v1';   // change to 'kp2-v2', 'kp2-v3', etc.
-   ```
-2. Re-upload the changed files to your host.
-3. Users will pick up the new version the next time they open the app
-   (may need to close and reopen once for the service worker to refresh).
-
----
-
-## Important limitations to share with your team
-
-1. **Each phone stores its own data.** Sales saved by Person A are not visible
-   to Person B. The data lives in the browser's local storage on that one device.
-   If a user clears their browser data or uninstalls, their history is gone.
-
-2. **No central database.** If you need shared sales data across staff or
-   locations, the app needs a real backend — that's a bigger build.
-
-3. **No Play Store / App Store listing.** This installs via the browser. It
-   looks and works like an app but doesn't appear in the stores. (Listing in
-   stores requires extra wrapping work — TWA for Play Store, Capacitor + a paid
-   Apple Developer account for App Store.)
-
-4. **iOS is stricter.** Some PWA features (like notifications) are limited on
-   older iOS versions. Adding to home screen has worked since iOS 11.3 though,
-   so install itself is fine.
-
-5. **First open needs internet.** After that the app works offline thanks to the
-   service worker, but the very first visit must download the files.
+1. Open the repo on GitHub.
+2. Tap **Add file → Upload files**.
+3. Select all 9 files from the unzipped `kp4-sales-app/` folder.
+   - On phone: tap the upload button, browse to where you extracted the
+     zip, multi-select if your file manager allows, or upload one by one.
+   - On desktop: drag all 9 files onto the upload page in one go.
+4. Scroll down → **Commit changes**.
+5. Once committed, go to **Settings → Pages**:
+   - Source: **Deploy from a branch**
+   - Branch: **main** / **(root)** → **Save**.
+6. Wait ~1 minute. Your URL appears at the top of the Pages settings:
+   `https://<your-username>.github.io/<repo-name>/`
 
 ---
 
-## Troubleshooting
+## 🧪 Verify the upload worked
 
-**"Install app" option doesn't appear on Android**
-→ The site must be HTTPS (✓ if you used Netlify/Cloudflare/GitHub Pages).
-→ Visit the page once, wait a few seconds, then check the ⋮ menu.
+After GitHub Pages says it's deployed:
 
-**iOS shows a blank icon on home screen**
-→ Make sure `apple-touch-icon.png` is in the same folder as `index.html` and
-  was uploaded together.
+1. Open the URL in **Chrome** on your Android phone.
+2. The page should load the KP-4 Sales Report with the **dark theme**.
+3. Within ~3 seconds, a **blue banner** should appear at the bottom
+   saying *"📱 Install KP-4 as an app"*.
+4. Tap the white **INSTALL** button on the banner.
+5. Confirm **Install** in the system popup.
+6. The home screen now has the blue KP-4 ring icon. Tap it — the app
+   opens full-screen.
 
-**"This site cannot provide a secure connection"**
-→ Your host isn't HTTPS. Switch to one of the three options above.
+**If the blue banner never appears**, the install won't work. Most likely
+causes:
+- A file is missing from the repo. Compare against the 9-file list above.
+- You opened the URL inside WhatsApp / Facebook / Instagram — those
+  use their own embedded browser that blocks PWA install. Long-press the
+  link → "Open in Chrome" instead.
+- The URL is still `http://` instead of `https://`. GitHub Pages always
+  serves https, so just retype the URL with `https://`.
 
-**Users on different phones see different data**
-→ Expected — see limitation #1 above. This app is single-device by design.
+---
+
+## 🍎 iPhone / iPad
+
+1. Open the URL in **Safari** (not Chrome — Apple doesn't allow PWA
+   install in any browser other than Safari).
+2. Tap **Share** ⎘ → **Add to Home Screen** → **Add**.
+3. The KP-4 ring icon appears on the home screen.
+
+---
+
+## 🔁 Pushing an update later
+
+If you ever change the app:
+1. Open `sw.js`, change the line near the top:
+   `const CACHE_VERSION = 'kp4-v2.0.0';` — bump to `kp4-v2.0.1` (or any
+   newer value).
+2. Re-upload the changed files to GitHub (replacing the old ones).
+3. Installed apps detect the new worker on the next launch and update
+   automatically.
+
+---
+
+## ⚙️ Features
+
+- Works fully offline after first visit.
+- Local data only — each device keeps its own history in `localStorage`.
+  Nothing is sent to any server.
+- Print monthly history or a single day's report from inside the app.
+- WhatsApp / Copy / Print buttons for quick sharing of daily totals.
+
+KP-4 · Daily Sales Automation · GST @ 9%
