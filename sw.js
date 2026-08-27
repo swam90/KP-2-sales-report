@@ -1,85 +1,76 @@
-/* KP-4 Sales Report — Service Worker
- * Strategy:
- *  - On install: precache the full app shell.
- *  - Navigation: network-first, falling back to cached index.html so the
- *    app opens when offline.
- *  - Static assets: cache-first, refresh in background.
- *  - Bump CACHE_VERSION on every release to invalidate old caches.
- */
+// KP2 Sales Report — Service Worker
+// Provides offline support and full PWA installability.
+// Bump CACHE_VERSION whenever you update index.html to force clients to refresh.
 
-const CACHE_VERSION = 'kp4-v2.4.0';
-const CACHE_NAME = `kp4-sales-${CACHE_VERSION}`;
-
-const PRECACHE_URLS = [
+const CACHE_VERSION = 'kp2-v2';
+const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',
-  './icon-maskable-512.png',
+  './icon-512-maskable.png',
   './apple-touch-icon.png',
-  './favicon.ico',
-  './favicon-32.png',
+  './favicon.png'
 ];
 
+// Install: pre-cache the app shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+    caches.open(CACHE_VERSION)
+      .then((cache) => cache.addAll(APP_SHELL))
       .then(() => self.skipWaiting())
-      .catch((err) => console.warn('[SW] Precache failed:', err))
   );
 });
 
+// Activate: clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys
-          .filter((key) => key.startsWith('kp4-sales-') && key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
 });
 
+// Fetch strategy:
+//   - HTML/navigation: network-first (so updates ship), fall back to cache offline
+//   - Other assets: cache-first (fast, works offline)
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  if (request.method !== 'GET') return;
-  const url = new URL(request.url);
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  const url = new URL(req.url);
+  // Only handle same-origin requests
   if (url.origin !== self.location.origin) return;
 
-  if (request.mode === 'navigate') {
+  const isHTML = req.mode === 'navigate' ||
+    (req.headers.get('accept') || '').includes('text/html');
+
+  if (isHTML) {
+    // Network-first for HTML
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
         })
-        .catch(() => caches.match(request)
-          .then((cached) => cached || caches.match('./index.html'))
-        )
+        .catch(() => caches.match(req).then((m) => m || caches.match('./index.html')))
     );
     return;
   }
 
+  // Cache-first for everything else
   event.respondWith(
-    caches.match(request).then((cached) => {
-      const fetchPromise = fetch(request)
-        .then((response) => {
-          if (response && response.ok && response.type === 'basic') {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || fetchPromise;
+    caches.match(req).then((cached) => {
+      if (cached) return cached;
+      return fetch(req).then((res) => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then((c) => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      });
     })
   );
-});
-
-self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
